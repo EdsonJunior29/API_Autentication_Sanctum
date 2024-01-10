@@ -55,19 +55,8 @@ Task::where('user_id', Auth::user()->id)->get()
         if(Auth::user()->id !== $task->user->id){
             return $this->error('', 'Not Authorized to make this request', 403);
         }
-        
-        return new TaskResource($task);
-    }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
+        return new TaskResource($task);
     }
 
     /**
@@ -77,9 +66,15 @@ Task::where('user_id', Auth::user()->id)->get()
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Task $task)
     {
-        //
+        if(Auth::user()->id !== $task->user->id){
+            return $this->error('', 'Not Authorized to make this request', 403);
+        }
+        
+        $task->update($request->all());
+
+        return new TaskResource($task);
     }
 
     /**

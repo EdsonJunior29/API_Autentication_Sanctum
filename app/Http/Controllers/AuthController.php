@@ -2,18 +2,36 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\LoginUserRequest;
 use App\Http\Requests\StoreUserRequest;
 use App\Models\User;
 use App\Traits\HttpResponses;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
     use HttpResponses;
 
-    public function login()
+    public function login(LoginUserRequest $request)
     {
-        return 'this is my login';
+        $request->validated($request->all());
+
+        $credencials = [
+            'email' => $request->email,
+            'password' => Hash::make($request->password)
+        ];
+
+        if(Auth::attempt($request->only( $credencials))) {
+            return $this->error('', 'Credentials do not match.', 401);
+        }
+
+        $user = User::where('email', $request->email)->first();
+        
+        return $this->success([
+            'User' => $user,
+            'token' => $user->createToken('API Token of ' . $user->name)->plainTextToken
+        ]);
     }
 
     public function register(StoreUserRequest $request)

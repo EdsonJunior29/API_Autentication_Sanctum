@@ -52,11 +52,7 @@ Task::where('user_id', Auth::user()->id)->get()
      */
     public function show(Task $task)
     {
-        if(Auth::user()->id !== $task->user->id){
-            return $this->error('', 'Not Authorized to make this request', 403);
-        }
-
-        return new TaskResource($task);
+        return $this->isNotAuthorized($task) ? $this->isNotAuthorized($task) : new TaskResource($task);
     }
 
     /**
@@ -83,8 +79,15 @@ Task::where('user_id', Auth::user()->id)->get()
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Task $task)
     {
-        //
+        return $this->isNotAuthorized($task) ? $this->isNotAuthorized($task) : $task->delete();
+    }
+
+    private function isNotAuthorized($task)
+    {
+        if(Auth::user()->id !== $task->user->id){
+            return $this->error('', 'Not Authorized to make this request', 403);
+        }
     }
 }
